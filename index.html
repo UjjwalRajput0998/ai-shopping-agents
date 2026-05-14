@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Multi-Agent Shopping System</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/tabler-icons.min.css" />
+  <style>
+    :root {
+      --bg:#0d0d12;--surface:#14141c;--surface2:#1c1c28;
+      --border:rgba(255,255,255,0.08);--border-a:rgba(255,255,255,0.15);
+      --text:#f0f0f5;--muted:#888899;--dim:#555566;
+      --blue:#4f9eff;--blue-bg:rgba(79,158,255,0.1);
+      --green:#4ade80;--green-bg:rgba(74,222,128,0.1);
+      --purple:#a78bfa;--purple-bg:rgba(167,139,250,0.1);
+      --amber:#fbbf24;--teal:#2dd4bf;
+      --red:#f87171;--red-bg:rgba(248,113,113,0.1);
+      --r:10px;--rl:14px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:2rem 1rem}
+    .wrap{max-width:900px;margin:0 auto}
+    .hdr{text-align:center;margin-bottom:2.5rem}
+    .hdr h1{font-size:clamp(22px,4vw,36px);font-weight:700;background:linear-gradient(135deg,#fff 0%,#a0a0c0 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+    .hdr p{color:var(--muted);font-size:15px;margin-bottom:16px}
+    .badges{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+    .bdg{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--muted)}
+    .bdg.b{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+    .bdg.g{border-color:var(--green);color:var(--green);background:var(--green-bg)}
+    .bdg.p{border-color:var(--purple);color:var(--purple);background:var(--purple-bg)}
+    .row{display:flex;gap:10px;margin-bottom:1.5rem}
+    .row input{flex:1;background:var(--surface);border:1px solid var(--border-a);color:var(--text);padding:14px 16px;border-radius:var(--r);font-size:15px;outline:none;transition:border-color .2s}
+    .row input:focus{border-color:var(--blue)}
+    .row input::placeholder{color:var(--dim)}
+    .btn{padding:14px 24px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;transition:opacity .2s,transform .1s}
+    .btn:hover{opacity:.9;transform:translateY(-1px)}
+    .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+    .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.5rem}
+    .metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;text-align:center}
+    .mlbl{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+    .mval{font-size:24px;font-weight:700}
+    .pipe{display:flex;align-items:center;margin-bottom:1.5rem;overflow-x:auto;padding:6px 0}
+    .pdot{width:36px;height:36px;border-radius:50%;border:1px solid var(--border-a);background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--dim);flex-shrink:0;transition:all .3s}
+    .pdot.run{border-color:var(--blue);color:var(--blue);background:var(--blue-bg);box-shadow:0 0 12px rgba(79,158,255,.3)}
+    .pdot.done{border-color:var(--green);color:var(--green);background:var(--green-bg)}
+    .pline{flex:1;height:1px;background:var(--border);min-width:8px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-bottom:1.5rem}
+    .acard{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:1.1rem;min-height:150px;transition:border-color .2s}
+    .acard.run{border-color:var(--blue)} .acard.done{border-color:var(--green)} .acard.error{border-color:var(--red)}
+    .ahdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+    .aleft{display:flex;align-items:center;gap:10px}
+    .aico{font-size:20px}
+    .aname{font-size:14px;font-weight:600;color:var(--text)}
+    .arole{font-size:12px;color:var(--dim);margin-top:2px}
+    .sb{font-size:10px;font-weight:600;padding:3px 8px;border-radius:5px;text-transform:uppercase;letter-spacing:.5px;flex-shrink:0}
+    .sb-w{background:var(--surface2);color:var(--dim)}
+    .sb-r{background:var(--blue-bg);color:var(--blue)}
+    .sb-d{background:var(--green-bg);color:var(--green)}
+    .sb-e{background:var(--red-bg);color:var(--red)}
+    .aout{font-size:12px;color:var(--muted);line-height:1.6;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);max-height:100px;overflow-y:auto;display:none}
+    .final{background:var(--surface);border:1.5px solid var(--green);border-radius:var(--rl);padding:1.5rem;display:none}
+    .fhdr{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+    .ftitle{font-size:16px;font-weight:700}
+    .fbdg{background:var(--green-bg);color:var(--green);font-size:11px;font-weight:600;padding:4px 10px;border-radius:6px}
+    .fbody{font-size:14px;color:var(--muted);line-height:1.8;white-space:pre-wrap}
+    .errmsg{background:var(--red-bg);border:1px solid var(--red);border-radius:var(--r);padding:1rem;margin-bottom:1rem;font-size:13px;color:var(--red);display:none}
+    @media(max-width:600px){.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hdr">
+    <h1>AI Multi-Agent Shopping System</h1>
+    <p>6 specialized AI agents collaborate in real-time to find your best deal</p>
+    <div class="badges">
+      <span class="bdg b"><i class="ti ti-brand-python"></i> Python FastAPI</span>
+      <span class="bdg p"><i class="ti ti-cpu"></i> Multi-Agent AI</span>
+      <span class="bdg g"><i class="ti ti-brain"></i> Claude Sonnet 4</span>
+      <span class="bdg"><i class="ti ti-rocket"></i> Live</span>
+    </div>
+  </div>
+
+  <div class="errmsg" id="err"></div>
+
+  <div class="row">
+    <input type="text" id="q" placeholder="e.g. best gaming laptop under ₹70,000 for college" />
+    <button class="btn" id="btn" onclick="run()">Find Best Deal ↗</button>
+  </div>
+
+  <div class="metrics">
+    <div class="metric"><div class="mlbl">Active Agents</div><div class="mval" id="ma">0</div></div>
+    <div class="metric"><div class="mlbl">Completed</div><div class="mval" id="md">0</div></div>
+    <div class="metric"><div class="mlbl">Time (s)</div><div class="mval" id="mt">—</div></div>
+  </div>
+
+  <div class="pipe" id="pipe"></div>
+  <div class="grid" id="grid"></div>
+
+  <div class="final" id="final">
+    <div class="fhdr">
+      <i class="ti ti-target" style="font-size:22px;color:#4ade80"></i>
+      <span class="ftitle">Final AI Recommendation</span>
+      <span class="fbdg">Decision Ready</span>
+    </div>
+    <div class="fbody" id="fbody"></div>
+  </div>
+</div>
+
+<script>
+// After Render deploy, replace this with your actual backend URL
+const API = "https://your-backend.onrender.com";
+
+const AGENTS=[
+  {id:"orchestrator",name:"Orchestrator",icon:"ti-git-branch",role:"Plans shopping strategy",color:"#a78bfa"},
+  {id:"search",name:"Search Agent",icon:"ti-search",role:"Discovers relevant products",color:"#4f9eff"},
+  {id:"price",name:"Price Analyst",icon:"ti-receipt-2",role:"Finds best deals & prices",color:"#fbbf24"},
+  {id:"review",name:"Review Agent",icon:"ti-star",role:"Analyzes customer reviews",color:"#2dd4bf"},
+  {id:"compare",name:"Comparison Agent",icon:"ti-scale",role:"Compares top options",color:"#a78bfa"},
+  {id:"recommender",name:"Recommender",icon:"ti-target",role:"Delivers final recommendation",color:"#4ade80"},
+];
+
+let tmr,st,dc=0;
+
+function init(){
+  dc=0;["ma","md"].forEach(i=>document.getElementById(i).textContent="0");
+  document.getElementById("mt").textContent="—";
+  document.getElementById("final").style.display="none";
+  document.getElementById("err").style.display="none";
+  document.getElementById("grid").innerHTML="";
+  document.getElementById("pipe").innerHTML="";
+  AGENTS.forEach((a,i)=>{
+    const d=document.createElement("div");d.className="pdot";d.id="d-"+a.id;
+    d.innerHTML=`<i class="ti ${a.icon}"></i>`;
+    document.getElementById("pipe").appendChild(d);
+    if(i<AGENTS.length-1){const l=document.createElement("div");l.className="pline";document.getElementById("pipe").appendChild(l);}
+    const c=document.createElement("div");c.className="acard";c.id="c-"+a.id;
+    c.innerHTML=`<div class="ahdr"><div class="aleft"><i class="ti ${a.icon} aico" style="color:${a.color}"></i><div><div class="aname">${a.name}</div><div class="arole">${a.role}</div></div></div><span class="sb sb-w" id="b-${a.id}">waiting</span></div><div class="aout" id="o-${a.id}"></div>`;
+    document.getElementById("grid").appendChild(c);
+  });
+}
+
+function setSt(id,s,out){
+  document.getElementById("c-"+id).className="acard "+(s==="running"?"run":s);
+  const b=document.getElementById("b-"+id);
+  b.className="sb sb-"+(s==="running"?"r":s==="done"?"d":s==="error"?"e":"w");
+  b.textContent=s==="running"?"running...":s;
+  const d=document.getElementById("d-"+id);
+  d.className="pdot "+(s==="done"?"done":s==="running"?"run":"");
+  if(out){const o=document.getElementById("o-"+id);o.textContent=out;o.style.display="block";}
+  document.getElementById("ma").textContent=document.querySelectorAll(".acard.run").length;
+}
+
+async function run(){
+  const q=document.getElementById("q").value.trim();
+  if(!q)return;
+  const btn=document.getElementById("btn");
+  btn.disabled=true;btn.textContent="Analyzing...";
+  init();
+  AGENTS.forEach(a=>setSt(a.id,"running"));
+  document.getElementById("ma").textContent=AGENTS.length;
+  st=Date.now();
+  tmr=setInterval(()=>{document.getElementById("mt").textContent=((Date.now()-st)/1000).toFixed(1);},100);
+  try{
+    const r=await fetch(`${API}/analyze`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({query:q})});
+    if(!r.ok)throw new Error("Server error "+r.status);
+    const data=await r.json();
+    AGENTS.forEach(a=>{
+      const res=data.results[a.id];
+      if(res){setSt(a.id,res.status,res.output);if(res.status==="done"){dc++;document.getElementById("md").textContent=dc;}}
+    });
+    const rec=data.results["recommender"];
+    if(rec&&rec.status==="done"){document.getElementById("fbody").textContent=rec.output;document.getElementById("final").style.display="block";}
+  }catch(e){
+    const el=document.getElementById("err");
+    el.textContent="⚠ Backend not connected yet. Deploy the Python backend on Render first! ("+e.message+")";
+    el.style.display="block";
+    AGENTS.forEach(a=>setSt(a.id,"error",""));
+  }
+  clearInterval(tmr);btn.disabled=false;btn.textContent="Find Best Deal ↗";
+}
+init();
+</script>
+</body>
+</html>
