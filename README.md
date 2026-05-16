@@ -7,7 +7,7 @@
 
 > 6 specialized AI agents collaborate in real-time to find you the best product deal — built with Python + Streamlit + Claude AI.
 
-🔗 **[Live Demo →](https://your-app.streamlit.app)**
+🔗 **[Live Demo →](https://ai-shopping-agents.streamlit.app)**
 
 ---
 
