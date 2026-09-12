@@ -13,7 +13,7 @@ st.set_page_config(
 def get_client():
     return Groq(api_key=st.secrets["GROQ_API_KEY"])
 
-MODEL = "llama-3.3-70b-versatile"
+MODEL = "llama3-70b-8192"
 
 # ── Agent definitions ─────────────────────────────────────────────────────────
 AGENTS = [
