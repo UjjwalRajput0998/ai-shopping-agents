@@ -8,7 +8,7 @@ st.set_page_config(page_title="AI Multi-Agent Shopping System", page_icon="🛒"
 def get_client():
     return Groq(api_key=st.secrets["GROQ_API_KEY"])
 
-MODEL = "llama3-70b-8192"
+MODEL = "qwen/qwen3.6-27b"
 
 AGENTS = [
     {"id": "orchestrator", "name": "🧠 Orchestrator",      "role": "Plans shopping strategy"},
